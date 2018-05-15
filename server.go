@@ -6,7 +6,7 @@ import (
 )
 
 type Server interface {
-	Serve(fib) Fib
+	Server(int) int
 	String() string
 }
 
@@ -34,7 +34,7 @@ var CreateNumberOfServers = func(n int) []Server {
 	return servers
 }
 
-var fibonacci(n int) int {
+var fibonacci = func(n int) int {
 	if n <= 1 {
 		return n
 	}
