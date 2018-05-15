@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 type Server interface {
-	Server(int) int
+	Serve(int) int
 	String() string
 }
 
@@ -14,7 +13,7 @@ type server struct {
 	id int
 }
 
-func (s *server) Server(fib int) int {
+func (s *server) Serve(fib int) int {
 	return fibonacci(fib)
 }
 

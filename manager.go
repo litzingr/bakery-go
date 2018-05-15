@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"sync"
-	"time"
 )
 
 type Manager interface {
-	Open(context.Context) (<-chan struct{}, error)
+	Start(context.Context)
 	Customers([]Customer)
 	Servers([]Server)
 }
@@ -22,7 +20,7 @@ type manager struct {
 	logger *log.Logger
 }
 
-func (m *manager) Open(ctx context.Context) (<-chan struct{}, error) {
+func (m *manager) Start(ctx context.Context) {
 	var wg sync.WaitGroup
 	done := make(chan struct{}, 1)
 	go func() {
@@ -31,7 +29,6 @@ func (m *manager) Open(ctx context.Context) (<-chan struct{}, error) {
 			case <-ctx.Done():
 				m.logger.Println("ending")
 				wg.Wait()
-				cancel()
 				done <- struct{}{}
 				return
 			case c := <-m.customerList:
@@ -39,22 +36,21 @@ func (m *manager) Open(ctx context.Context) (<-chan struct{}, error) {
 				wg.Add(1)
 				go func() {
 					o := s.Serve(c.Order())
-					m.serverList <- b
-					m.logger.Println("Served a customer")
+					m.serverList <- s;
+					m.logger.Println("Served a customer the number: ", o)
 					m.customerList <- c
 					wg.Done()
 				}()
 			}
 		}
 	}()
-	return done, nil
 }
 
 func (m *manager) Customers(customers []Customer) {
 	m.customers = customers
 	m.customerList = make(chan Customer, len(customers)+1)
 	for _, c := range m.customers {
-		m.customerLIst <- c
+		m.customerList <- c
 	}
 }
 
