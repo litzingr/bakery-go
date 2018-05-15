@@ -22,31 +22,20 @@ type manager struct {
 
 func (m *manager) Start(ctx context.Context) {
 	var wg sync.WaitGroup
-	done := make(chan struct{}, 1)
-	go func() {
 		for {
-			select {
-			case <-ctx.Done():
-				m.logger.Println("ending")
-				wg.Wait()
-				done <- struct{}{}
-				return
-			case c := <-m.customerList:
-				s := <-m.serverList
-				wg.Add(1)
-				go func() {
-					o := s.Serve(c.Order())
-					m.serverList <- s;
-					m.logger.Println("Served a customer the number: ", o)
-					m.customerList <- c
-					wg.Done()
-				}()
-			}
+			c := <-m.customerList
+			s := <-m.serverList
+			wg.Add(1)
+			o := s.Serve(c.Order())
+			m.logger.Println("Server", s.String(), "served customer", c.String(), " the number: ", o)
+			m.serverList <- s;
+			m.customerList <- c
+			wg.Done()
 		}
-	}()
 }
 
 func (m *manager) Customers(customers []Customer) {
+	m.logger.Println("finding", len(customers), "customers")
 	m.customers = customers
 	m.customerList = make(chan Customer, len(customers)+1)
 	for _, c := range m.customers {
@@ -55,6 +44,7 @@ func (m *manager) Customers(customers []Customer) {
 }
 
 func (m *manager) Servers(servers []Server) {
+        m.logger.Println("hiring", len(servers), "servers")
 	m.servers = servers
 	m.serverList = make(chan Server, len(servers)+1)
 	for _, b := range m.servers {

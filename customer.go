@@ -7,6 +7,7 @@ import (
 
 type Customer interface {
 	Order() int
+	String() int
 }
 
 type customer struct {
@@ -14,7 +15,11 @@ type customer struct {
 }
 
 func (c *customer) Order() int {
-	return randInt(13)
+	return randInt(21)
+}
+
+func (c *customer) String() int {
+	return c.id
 }
 
 func randInt(max int) int {

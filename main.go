@@ -13,10 +13,9 @@ var (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx:= context.Background()
 	logger := log.New(stderr, "", log.Lshortfile)
 	m := HireManager(logger)
-	logger.Println("gothere")
 	m.Customers(CreateNumberOfCustomers(10))
 	m.Servers(CreateNumberOfServers(5))
 	m.Start(ctx)
